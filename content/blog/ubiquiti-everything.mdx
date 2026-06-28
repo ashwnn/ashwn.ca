@@ -1,0 +1,348 @@
+export const metadata = {
+  title: "Ubiquiti Everything",
+  date: "2025-07-12",
+  summary:
+    "A full rebuild of my home network using UniFi gear to replace an ISP bottleneck, clean up a messy topology, and tune AP placement. I cover the wiring changes, VLAN segmentation, IDS/IPS, and the monitoring workflow that finally delivered stable, near plan speeds and better latency across the house.",
+  tags: ["networking", "ubiquiti", "homelab"],
+  cover_image: "/blog/network.png",
+  slug: "ubiquiti-everything",
+  draft: false,
+};
+
+<Callout intent="info">
+  <strong>TLDR:</strong> A 500 Mb/s plan was still capped by the ISP router,
+  messy wiring, and a repeater hop. I rebuilt the network with UniFi, kept the
+  ISP gateway isolated for Optik TV, added VLANs, and tuned AP placement. The
+  result: near full speeds, lower latency, and far better stability.
+</Callout>
+
+## Introduction
+
+After upgrading from 300 Mb/s to 500 Mb/s, my Wi-Fi throughput stayed stuck around 260 Mb/s and latency spiked when multiple devices were online. The ISP technician had also left a daisy-chained topology with an unnecessary MoCA hop. I wanted the speed I was paying for and a layout I could actually control, so I rebuilt the entire home network around Ubiquiti UniFi gear.
+
+This post covers what was wrong, how I redesigned the wiring and Wi-Fi layout, and how VLANs, UniFi security tools, and tuning finally delivered consistent performance.
+
+## Purpose
+
+Even though the ISP gateway and repeater were "good enough" on paper, they were not optimized for modern Wi-Fi standards or a high-device household. On a typical day, this network handles:
+
+<DataTable
+  headers={["Device", "Count"]}
+  rows={[
+    ["Phones", 6],
+    ["TVs", 2],
+    ["Android TV box", 1],
+    ["Optik TV client", 1],
+    ["Laptops", 6],
+  ]}
+/>
+
+I also self-host services and wanted hard segmentation between trusted devices, IoT, and management. My priorities were simple:
+
+<StepList
+  items={[
+    {
+      title: "Use the full 500 Mb/s",
+      description: "Remove ISP bottlenecks and get the speed I am paying for.",
+    },
+    {
+      title: "Improve coverage",
+      description: "Reduce dead zones and lower latency with better AP placement.",
+    },
+    {
+      title: "Add controls",
+      description: "Bring in VLANs, IDS/IPS, and proper monitoring.",
+    },
+  ]}
+/>
+
+## Topology
+
+### Old layout
+
+The main problems with the previous setup were straightforward:
+
+- A single CAT5 run went to the front of the house, then MoCA sent the signal back again.
+- AP placement forced a repeater hop and required switching SSIDs while walking through the house.
+
+That design created extra hops, inconsistent coverage, and unnecessary latency.
+
+### New layout
+
+The new layout removes the repeater and keeps everything on copper.
+
+- The ISP T3200 gateway remains at the rear because Optik TV depends on it as an NVR/control point.
+- A dedicated pass-through VLAN keeps Optik TV traffic isolated.
+- The UniFi switch at the front fans out to all APs and wired clients.
+
+AP placement:
+
+- UAP AC Pro ceiling mounted at the rear, powered via injector.
+- UAP nanoHD mounted at the front, powered by the PoE switch.
+
+That front/back placement covers the whole house without a repeater.
+
+## Equipment
+
+I optimized for low cost and easy management. Everything was bought used and tested with a PoE injector during pickup.
+
+<DataTable
+  headers={["Device", "Description", "Cost (CAD)"]}
+  rows={[
+    [
+      "UCG Ultra",
+      "Compact UniFi console that runs UniFi Network and scales to hundreds of clients.",
+      "$120",
+    ],
+    [
+      "US 8 60W",
+      "PoE switch with UniFi integration and VLAN support.",
+      "$60",
+    ],
+    ["UAP AC Pro", "Dual-band AP with strong coverage.", "$50"],
+    [
+      "UAP nanoHD",
+      "Compact, high-performance AP for dense clients.",
+      "$50",
+    ],
+    ["U-POE-AF", "Gigabit PoE injector.", "$5"],
+  ]}
+/>
+
+Links: [UCG Ultra](https://ca.store.ui.com/ca/en/products/ucg-ultra), [US 8 60W](https://store.ui.com/us/en/products/us-8-60w), [UAP AC Pro](https://ca.store.ui.com/ca/en/products/uap-ac-pro), [UAP nanoHD](https://ca.store.ui.com/ca/en/products/uap-nanohd), [U-POE-AF](https://ca.store.ui.com/ca/en/category/accessories-poe-power/collections/pro-store-poe-and-power-adapters/products/u-poe-af).
+
+Total: **$285**
+
+Replacing the ISP router alone would have been around $220, so the full stack was a solid bargain.
+
+## Configuration
+
+The configuration work focused on preserving Optik TV while letting UniFi handle everything else.
+
+<StepList
+  items={[
+    {
+      title: "WAN handling",
+      description:
+        "The T3200 stays online for Optik TV only, bridged via a pass-through VLAN.",
+    },
+    {
+      title: "VLANs",
+      description:
+        "Dedicated networks for main, IoT, guest, management, TELUS, and pass-through traffic.",
+    },
+    {
+      title: "IDS/IPS",
+      description: "UniFi intrusion detection and prevention enabled.",
+    },
+    {
+      title: "DHCP/DNS",
+      description: "Moved to the UCG Ultra for centralized control.",
+    },
+    {
+      title: "AP tuning",
+      description:
+        "Adjusted transmit power, minimum RSSI, and channels to reduce overlap and improve roaming.",
+    },
+  ]}
+/>
+
+By default, UniFi allows inter-VLAN traffic, so segmentation is enforced through VLAN design and targeted firewall rules.
+
+### VLANs
+
+<DataTable
+  headers={[
+    "Name",
+    "VLAN ID",
+    "Router",
+    "Subnet",
+    "DHCP",
+    "IP Leases",
+    "Pool Size",
+    "Available",
+    "Excluded",
+    "DHCP Range",
+  ]}
+  rows={[
+    [
+      "Default",
+      1,
+      "Home",
+      "10.0.0.0/24",
+      "Server",
+      7,
+      249,
+      242,
+      0,
+      "10.0.0.6 - 10.0.0.254",
+    ],
+    [
+      "Pass Through",
+      2,
+      "Home",
+      "10.0.2.0/24",
+      "Server",
+      1,
+      249,
+      248,
+      0,
+      "10.0.2.6 - 10.0.2.254",
+    ],
+    [
+      "IoT",
+      20,
+      "Home",
+      "10.0.20.0/24",
+      "Server",
+      0,
+      51,
+      51,
+      0,
+      "10.0.20.50 - 10.0.20.100",
+    ],
+    [
+      "Secure",
+      40,
+      "Home",
+      "10.0.40.0/28",
+      "None",
+      "-",
+      "-",
+      "-",
+      "-",
+      "-",
+    ],
+    [
+      "MGMT",
+      99,
+      "Home",
+      "10.0.99.0/24",
+      "Server",
+      0,
+      49,
+      49,
+      0,
+      "10.0.99.2 - 10.0.99.50",
+    ],
+    [
+      "Guest",
+      30,
+      "Home",
+      "10.0.30.0/24",
+      "Server",
+      0,
+      101,
+      101,
+      0,
+      "10.0.30.50 - 10.0.30.150",
+    ],
+    [
+      "TELUS",
+      10,
+      "Home",
+      "10.0.10.0/24",
+      "Server",
+      0,
+      101,
+      101,
+      0,
+      "10.0.10.100 - 10.0.10.200",
+    ],
+  ]}
+/>
+
+- **Default** is for trusted devices.
+- **IoT** isolates smart devices from laptops and phones.
+- **Guest** provides internet access without LAN exposure.
+- **MGMT** reserves access for UniFi and admin interfaces.
+- **Secure** isolates higher-risk services.
+- **Pass Through** and **TELUS** support ISP hardware without reintroducing double NAT.
+
+### Multicast and service discovery
+
+To keep Chromecast, printers, and Optik TV working across VLANs without flattening the network:
+
+- **mDNS proxy:** Custom
+  - VLAN scope: IoT (20) and TELUS (10)
+  - Service scope: only required services (AirPlay, Chromecast, printers, Spotify, SMB)
+- **IGMP snooping:** Enabled on IoT and TELUS
+- **Forward unknown multicast:** Router ports only
+- **Flood known protocols:** Enabled
+- **Fast leave:** Enabled
+- **IGMP querier VLANs:** IoT
+
+### Switch and Wi-Fi tuning
+
+Switching defaults stayed conservative:
+
+- STP: RSTP
+- Rogue DHCP detection: Disabled
+- Jumbo frames: Disabled
+- 802.1X: Disabled
+- L3 network isolation ACLs: Disabled during layout testing
+- Device isolation ACLs: Disabled for now
+
+Wi-Fi tuning focused on roaming and signal quality:
+
+- Lowered 2.4 GHz transmit power to reduce sticky clients.
+- Let UniFi auto-select channels per AP.
+- Set a minimum RSSI to force healthier roaming between APs.
+
+## Performance Results
+
+Testing with UniFi WiFiman and Fast.com showed a big jump in real throughput. One room over from an AP, I hit nearly 500 Mb/s with multiple clients active.
+
+<DataTable
+  headers={["Test Type", "Old Network", "New Network", "Notes"]}
+  rows={[
+    ["Wi-Fi speed (avg)", "~260 Mb/s", "480 Mb/s", "Consistent across rooms"],
+    [
+      "Ethernet throughput",
+      "430 Mb/s",
+      "505 Mb/s",
+      "Near full plan utilization",
+    ],
+    ["Ping (LAN to WAN)", "25 ms (avg)", "9 ms", "Lower latency"],
+    ["Bufferbloat", "Severe spikes", "None", "Segmentation stabilized traffic"],
+    ["Wi-Fi coverage", "-78 dBm", "-60 dBm", "Uniform coverage"],
+    ["Roaming", "Inconsistent", "Seamless", "No dropouts"],
+  ]}
+/>
+
+## Challenges and Lessons Learned
+
+<DataTable
+  headers={["Challenge", "Solution"]}
+  rows={[
+    [
+      "ISP gateway dependency for Optik TV",
+      "Dedicated pass-through VLAN keeps the gateway scoped to TV only.",
+    ],
+    [
+      "Double NAT and migration pain",
+      "A clean rebuild would have been faster than migrating the old layout.",
+    ],
+    [
+      "Cable management and PoE runs",
+      "Reused existing cable and added PoE injectors.",
+    ],
+    ["IoT isolation", "Created VLANs with targeted firewall rules."],
+    [
+      "Throughput tuning",
+      "Disabled unnecessary services, adjusted MTU, tuned AP power.",
+    ],
+    [
+      "Monitoring and metrics",
+      "Relied on UniFi dashboard for latency and device insights.",
+    ],
+  ]}
+/>
+
+The biggest takeaway was how much AP placement matters. Once the front/back layout was in place and transmit power was tuned, roaming and coverage improved immediately.
+
+## Conclusion
+
+The UniFi rebuild finally delivered what the 500 Mb/s plan promised: consistent Wi-Fi throughput above 480 Mb/s, lower latency, and much better stability. It also gave me a network I can monitor and secure properly.
+
+Next up: UPS integration, firewall automation, and deeper remote monitoring.

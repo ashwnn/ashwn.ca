@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Chain Reaction",
+    "summary": "Chain Reaction is a capstone project that simulates automated attacks inside a cloud (k8s) environment, using an AI decision loop to plan and execute multi-step attack sequences in real time.",
+    "tags": [
+      "go",
+      "kubernetes security",
+      "agentic ai"
+    ],
+    "date": "Apr 2026",
+    "repoUrl": "https://github.com/ashwnn/chain-reaction",
+    "caseStudyUrl": "",
+    "liveUrl": "",
+    "inProgress": true,
+    "previewImage": ""
+  },
+  {
+    "title": "Spender",
+    "summary": "Spender is a self-hosted personal finance app that gives you full control of your spending data. Import bank statements, auto-categorize transactions, set budgets and savings goals, and get a clear Health Score that shows where you stand and what to improve.",
+    "tags": [
+      "self-hosted",
+      "finance",
+      "budgeting"
+    ],
+    "date": "Apr 2026",
+    "repoUrl": "https://github.com/ashwnn/spender",
+    "caseStudyUrl": "",
+    "liveUrl": "",
+    "inProgress": true,
+    "previewImage": ""
+  },
+  {
+    "title": "Ohara",
+    "summary": "Persistent memory with typed retrieval, conflict detection, and context injection for AI coding agents. A fork of Engram that adds typed memory, conflict detection, relation graphs, hybrid search, and context injection for multi-project, multi-agent workflows.",
+    "tags": [
+      "go",
+      "sqlite",
+      "memory",
+      "agents",
+      "mcp"
+    ],
+    "date": "Apr 2026",
+    "repoUrl": "https://github.com/ashwnn/ohara",
+    "caseStudyUrl": "",
+    "liveUrl": "",
+    "inProgress": true,
+    "previewImage": ""
+  },
+  {
+    "title": "Digispark",
+    "summary": "Explore Keystroke Injection attacks with the Digispark USB development board.",
+    "tags": [
+      "arduino",
+      "digispark"
+    ],
+    "date": "Aug 2022",
+    "repoUrl": "/gh/Digispark",
+    "caseStudyUrl": "",
+    "liveUrl": "",
+    "previewImage": ""
+  }
+]

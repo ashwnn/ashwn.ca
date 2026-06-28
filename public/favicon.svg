@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Key ring -->
+  <circle cx="36" cy="38" r="18" stroke="#e4e4e7" stroke-width="9" fill="none"/>
+  <!-- Key shaft -->
+  <line x1="49" y1="51" x2="82" y2="82" stroke="#e4e4e7" stroke-width="9" stroke-linecap="round"/>
+  <!-- Key teeth -->
+  <line x1="69" y1="69" x2="76" y2="63" stroke="#e4e4e7" stroke-width="7" stroke-linecap="round"/>
+  <line x1="78" y1="79" x2="85" y2="73" stroke="#e4e4e7" stroke-width="7" stroke-linecap="round"/>
+</svg>
