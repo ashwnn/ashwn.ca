@@ -136,7 +136,7 @@ const mdxComponents: MDXComponents = {
   p: ({ children, ...props }) => {
     // Avoid wrapping block elements (figures, tables) in <p> to prevent
     // invalid HTML hydration errors. Standalone images in MDX compile to
-    // paragraph nodes — if our img component returns <figure>, we must
+    // paragraph nodes - if our img component returns <figure>, we must
     // not nest it inside <p>.
     const childrenArray = React.Children.toArray(children);
     if (

@@ -16,7 +16,7 @@ export type InternalPaths = {
 export type ExternalDestinations = {
   github: string;   // https://github.com/ashwnn
   linkedin: string;
-  pgp: string;      // keyserver URL — no longer used for redirect
+  pgp: string;      // keyserver URL - no longer used for redirect
   signal: string;
   licenseUrl: string;
 };

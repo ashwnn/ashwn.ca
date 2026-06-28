@@ -85,7 +85,7 @@ export default function Image() {
           </div>
         </div>
 
-        {/* Bottom row — role tags */}
+        {/* Bottom row - role tags */}
         <div style={{ display: "flex", gap: "12px" }}>
           {["Infrastructure", "Security Operations", "Software Engineering"].map((tag) => (
             <div
