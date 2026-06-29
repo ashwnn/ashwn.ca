@@ -1,6 +1,7 @@
 export type UmamiConfig = {
   enabled: boolean;
   scriptUrl: string;
+  recorderUrl: string;
   websiteId: string;
   domains: string[];
   eventPrefix: string;
@@ -52,8 +53,9 @@ export const siteConfig: SiteConfig = {
   },
   umami: {
     enabled: true,
-    scriptUrl: "https://um.ashwn.ca/script.js",
-    websiteId: "cdd6e3c0-1aa1-4a10-83b7-56157157bab8",
+    scriptUrl: "https://umm.ashwn.ca/script.js",
+    recorderUrl: "https://umm.ashwn.ca/recorder.js",
+    websiteId: "daa123c8-b692-41e3-b4a0-ab4076f841f0",
     domains: ["ashwn.ca"],
     eventPrefix: "workflow",
   },

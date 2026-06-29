@@ -60,12 +60,19 @@ export default function RootLayout({
       <body className={`${jetbrainsMono.variable} ${inter.variable}`}>
         <SiteShell>{children}</SiteShell>
         {siteConfig.umami.enabled ? (
-          <Script
-            src={siteConfig.umami.scriptUrl}
-            data-website-id={siteConfig.umami.websiteId}
-            data-domains={siteConfig.umami.domains.join(",")}
-            strategy="afterInteractive"
-          />
+          <>
+            <Script
+              src={siteConfig.umami.scriptUrl}
+              data-website-id={siteConfig.umami.websiteId}
+              data-domains={siteConfig.umami.domains.join(",")}
+              strategy="afterInteractive"
+            />
+            <Script
+              src={siteConfig.umami.recorderUrl}
+              data-website-id={siteConfig.umami.websiteId}
+              strategy="afterInteractive"
+            />
+          </>
         ) : null}
       </body>
     </html>
